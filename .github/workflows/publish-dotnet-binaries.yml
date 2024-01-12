@@ -41,9 +41,9 @@ jobs:
       
       - name: Build win-x64
         run: |
-          echo "RUNTIME=win-x64" 
-          dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime ${{ env.RUNTIME }} --verbosity quiet -p:PublishTrimmed=true -o ./build/${{ env.RUNTIME }}
-          Compress-Archive -Path ./build/${{ env.RUNTIME }} -DestinationPath ./release/JsUnMap-${{ github.run_number }}-${{ env.RUNTIME }}.zip
+          $RUNTIME = "win-x64"
+          dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME
+          Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME-$RUNTIME.zip
 
       - name: Create release
         id: create_release

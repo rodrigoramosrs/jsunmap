@@ -29,4 +29,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Feel free to [report issues](https://github.com/rodrigoramosrs/jsunmap/issues) or [make pull requests](https://github.com/rodrigoramosrsjsunmap/pulls). Happy coding! 👩‍💻🚀
+Feel free to [report issues](https://github.com/rodrigoramosrs/jsunmap/issues) or [make pull requests](https://github.com/rodrigoramosrs/jsunmap/pulls). Happy coding! 👩‍💻🚀

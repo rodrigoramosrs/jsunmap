@@ -45,7 +45,7 @@ jobs:
           foreach ($RUNTIME in $RUNTIMES) {
             echo "building $RUNTIME"
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
-            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME.zip
+            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
           }
           
       - name: Create release
@@ -69,22 +69,16 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: |
-            ./release/JsUnMap-win-x64.zip
-            ./release/JsUnMap-linux-x64.zip
-            ./release/JsUnMap-osx-x64.zip
-            ./release/JsUnMap-win-arm64.zip
-            ./release/JsUnMap-linux-arm64.zip
-            ./release/JsUnMap-osx-arm64.zip
+            ./release/JsUnMap-win-${{ github.run_number }}-x64.zip
+            ./release/JsUnMap-linux-${{ github.run_number }}-x64.zip
+            ./release/JsUnMap-osx-${{ github.run_number }}-x64.zip
+            ./release/JsUnMap-win-${{ github.run_number }}-arm64.zip
           asset_name: |
             JsUnMap-win-x64.zip
             JsUnMap-linux-x64.zip
             JsUnMap-osx-x64.zip
             JsUnMap-win-arm64.zip
-            JsUnMap-linux-arm64.zip
-            JsUnMap-osx-arm64.zip
           asset_content_type: |
-            application/zip
-            application/zip
             application/zip
             application/zip
             application/zip

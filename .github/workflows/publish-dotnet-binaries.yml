@@ -22,16 +22,22 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: |
+          cd ./src/
+          dotnet restore
 
       - name: Build binaries
-        run: dotnet build --configuration Release
+        run: |
+          cd ./src/
+          dotnet build --configuration Release
 
       - name: Publish binaries
-        run: dotnet publish --configuration Release --output ./publish
+        run: |
+          cd ./src/
+          dotnet publish --configuration Release --output ../publish
 
       - name: Create release
         id: create_release

@@ -69,15 +69,15 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: |
-            ./release/JsUnMap-win-${{ github.run_number }}-x64.zip
-            ./release/JsUnMap-linux-${{ github.run_number }}-x64.zip
-            ./release/JsUnMap-osx-${{ github.run_number }}-x64.zip
-            ./release/JsUnMap-win-${{ github.run_number }}-arm64.zip
+            ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
+            ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
+            ./release/JsUnMap-${{ github.run_number }}-osx-x64.zip
+            ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
           asset_name: |
-            JsUnMap-win-x64.zip
-            JsUnMap-linux-x64.zip
-            JsUnMap-osx-x64.zip
-            JsUnMap-win-arm64.zip
+            JsUnMap-${{ github.run_number }}win-x64.zip
+            JsUnMap-${{ github.run_number }}-x64.zip
+            JsUnMap-${{ github.run_number }}-x64.zip
+            JsUnMap-${{ github.run_number }}-arm64.zip
           asset_content_type: |
             application/zip
             application/zip

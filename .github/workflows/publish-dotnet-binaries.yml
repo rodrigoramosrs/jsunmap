@@ -9,15 +9,17 @@ env:
   
 jobs:         
   create_publish:
-    runs-on: linux-latest
+    runs-on: windows-latest
     steps:
        - name: Checkout code
          uses: actions/checkout@v2
          
        - name: Get commit message
          run: |
-           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
+           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+           #COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+           #echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
        - name: Create release
          id: create_release
          uses: actions/create-release@v1

@@ -9,6 +9,7 @@ env:
   
 jobs:         
   build_windows:
+    name: Build windows binaries
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -48,6 +49,7 @@ jobs:
             
       
   build_linux:
+    name: Build linux binaries
     runs-on: linux-latest
     needs: [build_windows]
     steps:
@@ -87,7 +89,8 @@ jobs:
             ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
             ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
 
-  create_publish:
+  create_release_and_publish:
+    name: Create release and publish
     needs: [build_windows,build_linux]
     runs-on: windows-latest
     steps:

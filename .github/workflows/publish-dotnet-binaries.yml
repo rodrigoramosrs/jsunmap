@@ -7,39 +7,11 @@ on:
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
   
-jobs:         
-  create_publish:
-    runs-on: windows-latest
-    steps:
-       - name: Checkout code
-         uses: actions/checkout@v2
-         
-       - name: Get commit message
-         run: |
-           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
-           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-           #COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-           #echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-       - name: Create release
-         id: create_release
-         uses: actions/create-release@v1
-         env:
-           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
-         with:
-           tag_name: v${{ github.run_number }}
-           release_name: Release v${{ github.run_number }}
-           body: |
-             Auto release. 
-             ${{ env.COMMIT_MESSAGE }}
-           draft: false
-           prerelease: false
-       - name: Variable
-         run: |
-            echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
+jobs:   
+
        
-  publish_windows:
+  build_windows:
     runs-on: windows-latest
-    needs: [create_publish]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -65,26 +37,21 @@ jobs:
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
           }
           ls ./release/
-     
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          upload_url: ${{ needs.create_publish.outputs.upload_url }}
-          asset_path: |
-            ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
-            ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
-          asset_name: |
+          name: |
             JsUnMap-${{ github.run_number }}-win-x64.zip
             JsUnMap-${{ github.run_number }}-win-arm64.zip
-          asset_content_type: |
-            application/zip
-            application/zip
-  
-  publish_linux:
+          path: |
+            ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
+            ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
+                
+            
+      
+  build_linux:
     runs-on: linux-latest
-    needs: [create_publish,publish_windows]
+    needs: [build_windows]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -93,7 +60,7 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 8.0.x
-
+  
       - name: Create paths
         run: |
           md build
@@ -110,19 +77,60 @@ jobs:
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
           }
           ls ./release/
-     
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
         with:
-          upload_url: ${{ needs.create_publish.outputs.upload_url }}
-          asset_path: |
-            ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
-            ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
-          asset_name: |
+          name: |
             JsUnMap-${{ github.run_number }}-linux-x64.zip
             JsUnMap-${{ github.run_number }}-linux-arm64.zip
-          asset_content_type: |
-            application/zip
-            application/zip
+          path: |
+            ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
+            ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
+
+  create_publish:
+    needs: [build_windows]
+    runs-on: windows-latest
+    steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
+         
+       - name: Get commit message
+         run: |
+           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
+           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+       - name: Create release
+         id: create_release
+         uses: actions/create-release@v1
+         env:
+           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+         with:
+           tag_name: v${{ github.run_number }}
+           release_name: Release v${{ github.run_number }}
+           body: |
+             Auto release. 
+             ${{ env.COMMIT_MESSAGE }}
+           draft: false
+           prerelease: false
+       - name: Upload release asset
+         uses: actions/upload-release-asset@v1
+         env:
+           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+         with:
+           upload_url: ${{ steps.create_release.outputs.upload_url }}
+           asset_path: |
+             ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
+             ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
+              ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
+             ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
+           asset_name: |
+             JsUnMap-${{ github.run_number }}-win-x64.zip
+             JsUnMap-${{ github.run_number }}-win-arm64.zip
+             JsUnMap-${{ github.run_number }}-linux-x64.zip
+             JsUnMap-${{ github.run_number }}-linux-arm64.zip
+           asset_content_type: |
+             application/zip
+             application/zip
+
+      

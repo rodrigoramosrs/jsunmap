@@ -58,7 +58,15 @@ jobs:
             ${{ env.COMMIT_MESSAGE }}
           draft: false
           prerelease: false
-
+          
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/*
+          
       - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:

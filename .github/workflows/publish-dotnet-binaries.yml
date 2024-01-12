@@ -44,7 +44,7 @@ jobs:
           files: ../build/win-x86
           dest: JsUnMap-${{steps.tag.outputs.tag}}-win-x86.zip
           recursive: false
-	  
+      
       - name: Bundle win-x86
         uses: vimtor/action-zip@v1
         with:

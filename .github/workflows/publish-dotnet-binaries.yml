@@ -47,7 +47,6 @@ jobs:
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
           }
-          
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -74,7 +73,7 @@ jobs:
             ./release/JsUnMap-${{ github.run_number }}-osx-x64.zip
             ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
           asset_name: |
-            JsUnMap-${{ github.run_number }}win-x64.zip
+            JsUnMap-${{ github.run_number }}-win-x64.zip
             JsUnMap-${{ github.run_number }}-x64.zip
             JsUnMap-${{ github.run_number }}-x64.zip
             JsUnMap-${{ github.run_number }}-arm64.zip

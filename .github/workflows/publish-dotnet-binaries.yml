@@ -33,17 +33,14 @@ jobs:
           
       - name: Restore dependencies
         run: |
-          cd ./src/
-          dotnet restore
+          dotnet restore ./src/jsunmap.sln
 
       - name: Build binaries
         run: |
-          cd ./src/
-          dotnet build --configuration Release
+          dotnet build ./src/jsunmap.sln --configuration Release
       
       - name: Build win-x64
         run: |
-          cd 
           dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime win-x64 --verbosity quiet -p:PublishTrimmed=true -o ./build/win-x86
 
       - name: Bundle win-x86

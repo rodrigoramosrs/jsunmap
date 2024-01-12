@@ -37,14 +37,14 @@ jobs:
 
       - name: Build binaries
         run: |
-          dotnet build ./src/jsunmap.sln --configuration Release -nowarn *
+          dotnet build ./src/jsunmap.sln --configuration Release -nowarn:*
       
       - name: Publish binaries
         run: |
-          $RUNTIMES = @("win-x64","linux-x64","osx-x64","win-arm64","linux-arm64")
+          $RUNTIMES = @("win-x64","linux-x64","osx-x64","win-arm64")
           foreach ($RUNTIME in $RUNTIMES) {
             echo "building $RUNTIME"
-            dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME -nowarn *
+            dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME -nowarn:*
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME-$RUNTIME.zip
           }
           

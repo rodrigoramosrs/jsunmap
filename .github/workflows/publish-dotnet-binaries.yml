@@ -26,7 +26,7 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Creating Paths
+      - name: Create paths
         run: |
           md build
           md release
@@ -39,12 +39,12 @@ jobs:
         run: |
           dotnet build ./src/jsunmap.sln --configuration Release
       
-      - name: Build win-x64
+      - name: Publish binaries
         run: |
-          $RUNTIMES = @("win-x64","linux-x64","osx-x64","win-arm64","linux-arm64","osx-arm64")
+          $RUNTIMES = @("win-x64","linux-x64","osx-x64","win-arm64","linux-arm64")
           foreach ($RUNTIME in $RUNTIMES) {
             echo "building $RUNTIME"
-            dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME
+            dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME -nowarn NETSDK1194,CS8600,CS8602,CS8604
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME-$RUNTIME.zip
           }
           

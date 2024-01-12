@@ -41,7 +41,7 @@ jobs:
       
       - name: Build win-x64
         run: |
-          $RUNTIMES = @("win-x86","win-x64","linux-x64","linux-arm","linux-arm64","osx-x64")
+          $RUNTIMES = @("win-x64","linux-x64","linux-arm","linux-arm64","osx-x64")
           foreach ($RUNTIME in $RUNTIMES) {
             echo build $RUNTIME
             dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME

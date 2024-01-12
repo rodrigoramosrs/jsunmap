@@ -33,12 +33,11 @@ jobs:
         run: |
           cd ./src/
           dotnet build --configuration Release
-
-			
+		
       - name: Build win-x86
         run: |
-            cd ./src
-            dotnet publish --configuration Release --self-contained true --runtime win-x86 --verbosity quiet -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -o ../build/win-x86
+          cd ./src
+          dotnet publish --configuration Release --self-contained true --runtime win-x86 --verbosity quiet -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -o ../build/win-x86
       	  
       - name: Bundle win-x86
         uses: vimtor/action-zip@v1
@@ -56,8 +55,8 @@ jobs:
 
       - name: Build win-x64
         run: |
-            cd ./src
-            dotnet publish --configuration Release --self-contained true --runtime win-x64 --verbosity quiet -p:PublishSingleFile=true -p:PublishTrimmed=true  --self-contained true -o ../build/win-x86
+          cd ./src
+          dotnet publish --configuration Release --self-contained true --runtime win-x64 --verbosity quiet -p:PublishSingleFile=true -p:PublishTrimmed=true  --self-contained true -o ../build/win-x86
 
       - name: Bundle win-x86
         uses: vimtor/action-zip@v1

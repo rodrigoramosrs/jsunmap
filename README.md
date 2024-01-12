@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-<img align="right" alt="GIF" src="./assets/img/logo.png" width="350" />
+<img align="left" alt="logo" src="./assets/img/logo.png" width="350" />
 
 ## Overview 🚀
 

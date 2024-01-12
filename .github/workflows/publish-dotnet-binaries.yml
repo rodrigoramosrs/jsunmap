@@ -18,8 +18,8 @@ jobs:
         run: |
           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          ::COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-          ::echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          #COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+          #echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
           
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1

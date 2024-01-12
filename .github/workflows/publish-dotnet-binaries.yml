@@ -39,14 +39,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: |
-            JsUnMap-${{ github.run_number }}-win-x64.zip
-            JsUnMap-${{ github.run_number }}-win-arm64.zip
-          path: |
-            ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
-            ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
-                
-            
+          name: JsUnMap-${{ github.run_number }}-win-x64.zip,JsUnMap-${{ github.run_number }}-win-arm64.zip
+          path: ./release
       
   build_linux:
     name: Build linux binaries
@@ -82,12 +76,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
         with:
-          name: |
-            JsUnMap-${{ github.run_number }}-linux-x64.zip
-            JsUnMap-${{ github.run_number }}-linux-arm64.zip
-          path: |
-            ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
-            ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
+          name: JsUnMap-${{ github.run_number }}-linux-x64.zip,JsUnMap-${{ github.run_number }}-linux-arm64.zip
+          path: ./release
 
   create_release_and_publish:
     name: Create release and publish

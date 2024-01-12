@@ -31,9 +31,13 @@ jobs:
              ${{ env.COMMIT_MESSAGE }}
            draft: false
            prerelease: false
-  
+       - name: Variable
+         run: |
+            echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
+       
   publish_windows:
     runs-on: windows-latest
+    needs: [create_publish]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -65,7 +69,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create_publish.outputs.upload_url }}
           asset_path: |
             ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
             ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
@@ -78,6 +82,7 @@ jobs:
   
   publish_linux:
     runs-on: linux-latest
+    needs: [create_publish,publish_windows]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -109,7 +114,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create_publish.outputs.upload_url }}
           asset_path: |
             ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
             ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip

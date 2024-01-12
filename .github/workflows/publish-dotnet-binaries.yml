@@ -16,7 +16,7 @@ jobs:
         
       - name: Get commit message
         run: |
-          for /f "delims=" %a in ('git log -1 --pretty=format^:%s') do set COMMIT_MESSAGE=%a
+          for /f ("delims=" %a) in ('git log -1 --pretty=format^:%s') do set COMMIT_MESSAGE=%a
           setx COMMIT_MESSAGE "%COMMIT_MESSAGE%"
           ::COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
           ::echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"

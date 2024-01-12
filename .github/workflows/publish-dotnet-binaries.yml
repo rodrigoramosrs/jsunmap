@@ -34,14 +34,37 @@ jobs:
           cd ./src/
           dotnet build --configuration Release
 
-      - name: Publish binaries
+			
+      - name: Build win-x86
         run: |
-          cd ./src/
-          dotnet publish --configuration Release --self-contained true --runtime win-x64 --output ./../publish
-          dotnet publish --configuration Release --self-contained true --runtime linux-x64 --output ./../publish
-          dotnet publish --configuration Release --self-contained true --runtime linux-arm --output ./../publish
-          dotnet publish --configuration Release --self-contained true --runtime linux-arm64 --output ./../publish
-          dotnet publish --configuration Release --self-contained true --runtime osx-x64 --output ./../publish
+            cd ./src
+            dotnet publish --configuration Release --self-contained true --runtime win-x86 --verbosity quiet -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -o ../build/win-x86
+      	  
+      - name: Bundle win-x86
+        uses: vimtor/action-zip@v1
+        with:
+          files: ../build/win-x86
+          dest: JsUnMap-${{steps.tag.outputs.tag}}-win-x86.zip
+          recursive: false
+  	  
+      - name: Bundle win-x86
+        uses: vimtor/action-zip@v1
+        with:
+          files: ../build/win-x86
+          dest: JsUnMap-${{steps.tag.outputs.tag}}-win-x86.zip
+          recursive: false
+
+      - name: Build win-x64
+        run: |
+            cd ./src
+            dotnet publish --configuration Release --self-contained true --runtime win-x64 --verbosity quiet -p:PublishSingleFile=true -p:PublishTrimmed=true  --self-contained true -o ../build/win-x86
+
+      - name: Bundle win-x86
+        uses: vimtor/action-zip@v1
+        with:
+          files: ../build/win-x64
+          dest: JsUnMap-${{steps.tag.outputs.tag}}-win-x64.zip
+          recursive: false
 
       - name: Create release
         id: create_release
@@ -61,4 +84,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: binaries
-          path: ./../publish
+          path: ./build/

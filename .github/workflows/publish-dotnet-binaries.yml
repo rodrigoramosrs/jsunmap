@@ -37,7 +37,12 @@ jobs:
       - name: Publish binaries
         run: |
           cd ./src/
-          dotnet publish --configuration Release --output ../publish
+          dotnet publish --configuration Release --self-contained true --runtime win-x86 --output ./../publish
+          dotnet publish --configuration Release --self-contained true --runtime win-x64 --output ./../publish
+          dotnet publish --configuration Release --self-contained true --runtime linux-x64 --output ./../publish
+          dotnet publish --configuration Release --self-contained true --runtime linux-arm --output ./../publish
+          dotnet publish --configuration Release --self-contained true --runtime linux-arm64 --output ./../publish
+          dotnet publish --configuration Release --self-contained true --runtime osx-x64 --output ./../publish
 
       - name: Create release
         id: create_release
@@ -57,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: binaries
-          path: ./publish
+          path: ./../publish

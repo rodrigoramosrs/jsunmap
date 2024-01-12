@@ -1,8 +1,10 @@
-![logo](https://github.com/rodrigoramosrs/jsunmap/assets/18005614/e973de25-85a2-4897-af9d-0cdfe9d8331a)#JSUnMap 🌐🔍
+<img align="left" alt="logo" src="https://github.com/rodrigoramosrs/jsunmap/assets/18005614/e973de25-85a2-4897-af9d-0cdfe9d8331a" width="150" />
+
+# JSUnMap 🌐
+`Uncovering the map` 🔍
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-<img align="left" alt="logo" src="./assets/img/logo.png" width="350" />
 
 ## Overview 🚀
 
@@ -18,7 +20,7 @@
 ## Example 📖
 
 ```shell
-jsunmap {FILE_OR_URL_PATH}
+jsunmap [{FILE_OR_URL_PATH}]
 ```
 
 ## License 📝

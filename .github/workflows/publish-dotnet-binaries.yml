@@ -68,9 +68,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          path: |
+          asset_path: |
             ./release/JsUnMap-win-x64.zip
+            ./release/JsUnMap-linux-x64.zip
+            ./release/JsUnMap-osx-x64.zip
+            ./release/JsUnMap-win-arm64.zip
+            ./release/JsUnMap-linux-arm64.zip
+            ./release/JsUnMap-osx-arm64.zip
           asset_name: |
             JsUnMap-win-x64.zip
+            JsUnMap-linux-x64.zip
+            JsUnMap-osx-x64.zip
+            JsUnMap-win-arm64.zip
+            JsUnMap-linux-arm64.zip
+            JsUnMap-osx-arm64.zip
           asset_content_type: |
+            application/zip
+            application/zip
+            application/zip
+            application/zip
+            application/zip
             application/zip

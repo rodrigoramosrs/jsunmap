@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "jsunmap": {
+      "commandName": "Project",
+      "commandLineArgs": "https://support.microsoft.com/js/SilentSignInManager.Main.min.js.map"
+    }
+  }
+}

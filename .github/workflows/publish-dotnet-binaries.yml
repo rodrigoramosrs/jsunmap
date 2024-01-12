@@ -35,11 +35,11 @@ jobs:
         run: |
           dotnet restore ./src/jsunmap.sln
 
-      - name: Build binaries
+      - name: Compile solution
         run: |
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
       
-      - name: Publish binaries
+      - name: Create distro binaries
         run: |
           $RUNTIMES = @("win-x64","linux-x64","osx-x64","win-arm64")
           foreach ($RUNTIME in $RUNTIMES) {
@@ -47,6 +47,7 @@ jobs:
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
           }
+          ls ./release/
       - name: Create release
         id: create_release
         uses: actions/create-release@v1

@@ -26,6 +26,11 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Creating Paths
+        run: |
+          md build
+          md release
+          
       - name: Restore dependencies
         run: |
           cd ./src/
@@ -45,7 +50,7 @@ jobs:
         uses: vimtor/action-zip@v1
         with:
           files: ./build/win-x64
-          dest: JsUnMap-${{steps.tag.outputs.tag}}-win-x64.zip
+          dest: ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
           recursive: false
 
       - name: Create release
@@ -66,4 +71,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: binaries
-          path: ./build/
+          path: ./release/

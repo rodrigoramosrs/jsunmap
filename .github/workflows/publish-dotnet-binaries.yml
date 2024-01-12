@@ -13,6 +13,7 @@ jobs:
     steps:
        - name: Checkout code
          uses: actions/checkout@v2
+         
        - name: Get commit message
          run: |
            COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
@@ -34,6 +35,9 @@ jobs:
   publish_windows:
     runs-on: windows-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
@@ -75,6 +79,9 @@ jobs:
   publish_linux:
     runs-on: linux-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+    
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:

@@ -41,10 +41,13 @@ jobs:
       
       - name: Build win-x64
         run: |
-          $RUNTIME = "win-x64"
-          dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME
-          Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME-$RUNTIME.zip
-
+          $RUNTIMES = @("win-x86","win-x64","linux-x64","linux-arm","linux-arm64","osx-x64")
+          foreach ($RUNTIME in $RUNTIMES) {
+            echo build $RUNTIME
+            dotnet publish ./src/jsunmap.sln --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME
+            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME-$RUNTIME.zip
+          }
+          
       - name: Create release
         id: create_release
         uses: actions/create-release@v1

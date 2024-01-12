@@ -45,7 +45,7 @@ jobs:
           foreach ($RUNTIME in $RUNTIMES) {
             echo "building $RUNTIME"
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
-            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME-$RUNTIME.zip
+            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-$RUNTIME.zip
           }
           
       - name: Create release

@@ -7,9 +7,7 @@ on:
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
   
-jobs:   
-
-       
+jobs:         
   build_windows:
     runs-on: windows-latest
     steps:
@@ -90,12 +88,14 @@ jobs:
             ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
 
   create_publish:
-    needs: [build_windows]
+    needs: [build_windows,build_linux]
     runs-on: windows-latest
     steps:
-       - name: Checkout code
-         uses: actions/checkout@v2
-         
+       - name: Create paths
+         run: |
+           md build
+           md release
+           
        - name: Get commit message
          run: |
            $COMMIT_MESSAGE = git log -1 --pretty=format:%s
@@ -113,6 +113,16 @@ jobs:
              ${{ env.COMMIT_MESSAGE }}
            draft: false
            prerelease: false
+       - name: Download artifact
+         uses: actions/download-artifact@v2
+         with:
+           name: |
+             JsUnMap-${{ github.run_number }}-win-x64.zip
+             JsUnMap-${{ github.run_number }}-win-arm64.zip
+             JsUnMap-${{ github.run_number }}-linux-x64.zip
+             JsUnMap-${{ github.run_number }}-linux-arm64.zip
+           path: ./release/
+             
        - name: Upload release asset
          uses: actions/upload-release-asset@v1
          env:
@@ -122,7 +132,7 @@ jobs:
            asset_path: |
              ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
              ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
-              ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
+             ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
              ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
            asset_name: |
              JsUnMap-${{ github.run_number }}-win-x64.zip
@@ -130,6 +140,8 @@ jobs:
              JsUnMap-${{ github.run_number }}-linux-x64.zip
              JsUnMap-${{ github.run_number }}-linux-arm64.zip
            asset_content_type: |
+             application/zip
+             application/zip
              application/zip
              application/zip
 

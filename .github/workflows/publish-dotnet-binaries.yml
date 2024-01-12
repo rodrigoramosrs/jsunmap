@@ -7,20 +7,33 @@ on:
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
   
-jobs:
-  publish:
+jobs:         
+  create_publish:
+    runs-on: linux-latest
+    steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
+       - name: Get commit message
+         run: |
+           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+       - name: Create release
+         id: create_release
+         uses: actions/create-release@v1
+         env:
+           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+         with:
+           tag_name: v${{ github.run_number }}
+           release_name: Release v${{ github.run_number }}
+           body: |
+             Auto release. 
+             ${{ env.COMMIT_MESSAGE }}
+           draft: false
+           prerelease: false
+  
+  publish_windows:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        
-      - name: Get commit message
-        run: |
-          $COMMIT_MESSAGE = git log -1 --pretty=format:%s
-          Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          #COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-          #echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
@@ -31,37 +44,18 @@ jobs:
           md build
           md release
           
-      - name: Restore dependencies
+      - name: Compile binaries
         run: |
+          $RUNTIMES = @("win-x64","win-arm64")
           dotnet restore ./src/jsunmap.sln
-
-      - name: Compile solution
-        run: |
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
-      
-      - name: Create distro binaries
-        run: |
-          $RUNTIMES = @("win-x64","linux-x64","osx-x64","win-arm64")
           foreach ($RUNTIME in $RUNTIMES) {
             echo "building $RUNTIME"
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
             Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
           }
           ls ./release/
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          body: |
-            Auto release. 
-            ${{ env.COMMIT_MESSAGE }}
-          draft: false
-          prerelease: false
-          
+     
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
@@ -70,16 +64,51 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: |
             ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
-            ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
-            ./release/JsUnMap-${{ github.run_number }}-osx-x64.zip
             ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
           asset_name: |
             JsUnMap-${{ github.run_number }}-win-x64.zip
-            JsUnMap-${{ github.run_number }}-x64.zip
-            JsUnMap-${{ github.run_number }}-x64.zip
-            JsUnMap-${{ github.run_number }}-arm64.zip
+            JsUnMap-${{ github.run_number }}-win-arm64.zip
           asset_content_type: |
             application/zip
             application/zip
+  
+  publish_linux:
+    runs-on: linux-latest
+    steps:
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Create paths
+        run: |
+          md build
+          md release
+          
+      - name: Compile binaries
+        run: |
+          $RUNTIMES = @("linux-x64","linux-arm64",)
+          dotnet restore ./src/jsunmap.sln
+          dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
+          foreach ($RUNTIME in $RUNTIMES) {
+            echo "building $RUNTIME"
+            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
+            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
+          }
+          ls ./release/
+     
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: |
+            ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
+            ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
+          asset_name: |
+            JsUnMap-${{ github.run_number }}-linux-x64.zip
+            JsUnMap-${{ github.run_number }}-linux-arm64.zip
+          asset_content_type: |
             application/zip
             application/zip

@@ -37,10 +37,10 @@ jobs:
           release_name="jsunmap-$version-${{ matrix.arch }}"
 
           # Self contained
-          dotnet publish -c Release -r "${{ matrix.arch }}" -o "$release_name_standalone" --self-contained -p:PublishTrimmed=true
+          dotnet publish ./src/jsunmap.csproj -c Release -r "${{ matrix.arch }}" -o "$release_name_standalone" --self-contained -p:PublishTrimmed=true
 
           # Framework dependant
-          dotnet publish -c Release -r "${{ matrix.arch }}" -o "$release_name" --self-contained false -p:PublishTrimmed=false
+          dotnet publish ./src/jsunmap.csproj -c Release -r "${{ matrix.arch }}" -o "$release_name" --self-contained false -p:PublishTrimmed=false
 
           if [ "${{ matrix.arch }}" == "win-x64" ]; then
             # Pack for standalone version

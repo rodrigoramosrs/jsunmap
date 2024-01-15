@@ -49,7 +49,7 @@ jobs:
             release_name="jsunmap-$version-#target_os_filename"
             target_arch="$arch"
             
-            echo "Arch: $target_arch
+            echo "Arch: $target_arch"
             echo "Self contained: $release_name_standalone"
             
             dotnet restore ./src/jsunmap.sln

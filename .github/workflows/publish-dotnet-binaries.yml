@@ -24,7 +24,7 @@ jobs:
             arch_list: "linux-x64,linux-arm64"
           - os: macos-latest
             target_os: macos
-            arch_list: "osx-64"
+            arch_list: "osx-x64"
     steps:
       - name: Checkout
         uses: actions/checkout@v3

@@ -53,7 +53,7 @@ jobs:
          
       - name: Compile binaries
         run: |
-          RUNTIMES=("linux-x64" "linux-arm64")
+          RUNTIMES=("linux-x64")
           mkdir build
           mkdir release
           dotnet restore ./src/jsunmap.sln
@@ -106,7 +106,6 @@ jobs:
              JsUnMap-${{ github.run_number }}-win-x64.zip
              JsUnMap-${{ github.run_number }}-win-arm64.zip
              JsUnMap-${{ github.run_number }}-linux-x64.zip
-             JsUnMap-${{ github.run_number }}-linux-arm64.zip
            path: ./release/
              
        - name: Upload release asset
@@ -119,12 +118,10 @@ jobs:
              ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
              ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
              ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
-             ./release/JsUnMap-${{ github.run_number }}-linux-arm64.zip
            asset_name: |
              JsUnMap-${{ github.run_number }}-win-x64.zip
              JsUnMap-${{ github.run_number }}-win-arm64.zip
              JsUnMap-${{ github.run_number }}-linux-x64.zip
-             JsUnMap-${{ github.run_number }}-linux-arm64.zip
            asset_content_type: |
              application/zip
              application/zip

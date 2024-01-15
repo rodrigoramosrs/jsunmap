@@ -55,7 +55,7 @@ jobs:
           sudo dpkg --add-architecture i386; sudo dpkg --add-architecture armhf; sudo dpkg --add-architecture arm64
           sudo apt-get update || true
           sudo apt-get -yq install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
-          run: sudo apt-get -yq install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+          sudo apt-get -yq install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
           
           
       - name: Build

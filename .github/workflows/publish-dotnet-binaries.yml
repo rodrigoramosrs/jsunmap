@@ -7,128 +7,59 @@ on:
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
   
-jobs:         
-  build_windows:
-    name: Build windows binaries
-    runs-on: windows-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 8.0.x
- 
-      - name: Compile binaries
-        run: |
-          $RUNTIMES = @("win-x64","win-arm64")
-          md build
-          md release
-          dotnet restore ./src/jsunmap.sln
-          dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
-          foreach ($RUNTIME in $RUNTIMES) {
-            echo "building $RUNTIME"
-            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
-            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
-          }
-          ls ./release/
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: JsUnMap-${{ github.run_number }}-win-x64.zip,JsUnMap-${{ github.run_number }}-win-arm64.zip
-          path: ./release
-      
-  build_linux:
-    name: Build linux binaries
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-    
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 8.0.x
-         
-      - name: Compile binaries
-        run: |
-          RUNTIMES=("linux-x64")
-          mkdir build
-          mkdir release
-          dotnet restore ./src/jsunmap.sln
-          dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
-          for RUNTIME in "${RUNTIMES[@]}"; do
-            echo "building $RUNTIME"
-            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
-            zip -r  ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip ./build/$RUNTIME
-          done
-          ls ./release/
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
-        with:
-          name: JsUnMap-${{ github.run_number }}-linux-x64.zip,JsUnMap-${{ github.run_number }}-linux-arm64.zip
-          path: ./release
-
-  create_release_and_publish:
+jobs:
+  release_and_publish:
     name: Create release and publish
-    needs: [build_windows,build_linux]
-    runs-on: ubuntu-latest
-    steps:
-       - name: Create paths
-         run: |
-           mkdir build
-           mkdir release
-
-       - name: Checkout code
-         uses: actions/checkout@v2
+    strategy:
+      matrix:
+        arch: ['win-x64', 'win-arm64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx.11.0-arm64', 'osx.12-arm64']
         
-       - name: Get commit message
-         run: |
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 8.0.x
+      - name: Get commit message
+        run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
           
-       - name: Create release
-         id: create_release
-         uses: actions/create-release@v1
-         env:
-           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
-         with:
-           tag_name: v${{ github.run_number }}
-           release_name: Release v${{ github.run_number }}
-           body: |
-             Auto release. 
-             ${{ env.COMMIT_MESSAGE }}
-           draft: false
-           prerelease: false
-       - name: Download artifact
-         uses: actions/download-artifact@v2
-         with:
-           name: |
-             JsUnMap-${{ github.run_number }}-win-x64.zip
-             JsUnMap-${{ github.run_number }}-win-arm64.zip
-             JsUnMap-${{ github.run_number }}-linux-x64.zip
-           path: ./release/
-             
-       - name: Upload release asset
-         uses: actions/upload-release-asset@v1
-         env:
-           GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
-         with:
-           upload_url: ${{ steps.create_release.outputs.upload_url }}
-           asset_path: |
-             ./release/JsUnMap-${{ github.run_number }}-win-x64.zip
-             ./release/JsUnMap-${{ github.run_number }}-win-arm64.zip
-             ./release/JsUnMap-${{ github.run_number }}-linux-x64.zip
-           asset_name: |
-             JsUnMap-${{ github.run_number }}-win-x64.zip
-             JsUnMap-${{ github.run_number }}-win-arm64.zip
-             JsUnMap-${{ github.run_number }}-linux-x64.zip
-           asset_content_type: |
-             application/zip
-             application/zip
-             application/zip
+      - name: Build
+        shell: bash
+        run: |
+          version=$(cat ./src/jsunmap.sln | grep -oP "<Version>\K([0-9]\.[0-9]\.[0-9])")
+          version=${{ github.run_number }}
+          release_name_standalone="jsunmap-$version-${{ matrix.arch }}-standalone"
+          release_name="jsunmap-$version-${{ matrix.arch }}"
 
+          # Self contained
+          dotnet publish -c Release -r "${{ matrix.arch }}" -o "$release_name_standalone" --self-contained -p:PublishTrimmed=true
+
+          # Framework dependant
+          dotnet publish -c Release -r "${{ matrix.arch }}" -o "$release_name" --self-contained false -p:PublishTrimmed=false
+
+          if [ "${{ matrix.arch }}" == "win-x64" ]; then
+            # Pack for standalone version
+            7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
+            
+            # Pack for Framework dependant version
+            7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          else
+            tar czvf "${release_name_standalone}.tar.gz" "$release_name_standalone"
+            
+            tar czvf "${release_name}.tar.gz" "$release_name"
+          fi
+
+          rm -r "$release_name_standalone"
+          rm -r "$release_name"
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "jsunmap-*"
       

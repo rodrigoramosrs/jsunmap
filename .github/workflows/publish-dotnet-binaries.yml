@@ -75,17 +75,21 @@ jobs:
   create_release_and_publish:
     name: Create release and publish
     needs: [build_windows,build_linux]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
        - name: Create paths
          run: |
-           md build
-           md release
-           
+           mkdir build
+           mkdir release
+
+       - name: Checkout code
+         uses: actions/checkout@v2
+        
        - name: Get commit message
          run: |
-           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
-           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+          echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          
        - name: Create release
          id: create_release
          uses: actions/create-release@v1

@@ -44,8 +44,7 @@ jobs:
       
   build_linux:
     name: Build linux binaries
-    runs-on: linux-latest
-    needs: [build_windows]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2

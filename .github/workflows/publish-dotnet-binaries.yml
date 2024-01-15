@@ -43,9 +43,9 @@ jobs:
           release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
           release_name="jsunmap-$version-#target_os_filename"
           target_arch=""
-          if [[ "${{ matrix.target_os }}" == "Windows" ]]; then
+          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
             target_arch="win-${{ matrix.arch }}"
-          elif [[ "${{ matrix.target_os }}" == "Linux" ]]; then
+          elif [[ "${{ matrix.target_os }}" == "linux" ]]; then
             target_arch="linux-${{ matrix.arch }}"
           elif [[ "${{ matrix.target_os }}" == "macOS" ]]; then
             target_arch="osx-${{ matrix.arch }}"
@@ -54,6 +54,7 @@ jobs:
           dotnet restore ./src/jsunmap.sln
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
 
+          echo "Arch: $target_arch - ${{ matrix.arch  }}"
           echo "Self contained: $release_name_standalone"
           
           # Self contained

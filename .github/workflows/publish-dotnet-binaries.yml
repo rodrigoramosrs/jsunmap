@@ -44,7 +44,12 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          
+      
+      - name: Get commit message unix
+        if: matrix.target_os != 'windows'
+        run: |
+          sudo apt-get update && sudo apt-get install clang zlib1g-dev -y
+          export PATH=$PATH:/usr/bin/clang
       - name: Build
         shell: bash
         run: |

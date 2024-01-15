@@ -47,7 +47,7 @@ jobs:
             target_arch="win-${{ matrix.arch }}"
           elif [[ "${{ matrix.target_os }}" == "linux" ]]; then
             target_arch="linux-${{ matrix.arch }}"
-          elif [[ "${{ matrix.target_os }}" == "macOS" ]]; then
+          elif [[ "${{ matrix.target_os }}" == "macos" ]]; then
             target_arch="osx-${{ matrix.arch }}"
           fi
 
@@ -64,7 +64,7 @@ jobs:
           # Framework dependant
           dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name" -p:PublishTrimmed=false
 
-          if [ "${{ matrix.target_os }}" == "Windows" ]; then
+          if [ "${{ matrix.target_os }}" == "windows" ]; then
             # Pack for standalone version
             7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
             

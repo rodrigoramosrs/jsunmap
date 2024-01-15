@@ -58,11 +58,11 @@ jobs:
           echo "Self contained: $release_name_standalone"
           
           # Self contained
-          dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone" -p:PublishTrimmed=true
+          dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
           
           echo "Framework dependant: $release_name"
           # Framework dependant
-          dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name" -p:PublishTrimmed=false
+          dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
 
           if [ "${{ matrix.target_os }}" == "windows" ]; then
             # Pack for standalone version

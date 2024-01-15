@@ -33,15 +33,17 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 8.0.x
-      - name: Get commit message
+      - name: Get commit message windows
+        if: matrix.target_os == 'windows'
         run: |
-         if [ "${{ matrix.target_os }}" == "windows" ]; then
-           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
-           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-         else
-           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-         fi
+          $COMMIT_MESSAGE = git log -1 --pretty=format:%s
+          Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+      
+      - name: Get commit message unix
+        if: matrix.target_os != 'windows'
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+          echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
           
       - name: Build
         shell: bash
@@ -64,10 +66,11 @@ jobs:
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
             
             echo "Framework dependant: $release_name"
+            
             # Framework dependant
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
 
-            if [ "${{ matrix.target_os }}" == "windows" ]; then
+            if [[ "${{ matrix.target_os }}" == "windows" ]]; then
               # Pack for standalone version
               7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
 

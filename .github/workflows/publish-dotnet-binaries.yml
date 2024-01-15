@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: |
           version=${{ github.run_number }}
-          matrix_arch_list="${{ matrix.arch_list }}"
+          matrix_arch_list="(${{ matrix.arch_list }})"
           for arch in "${matrix_arch_list[@]}"; do
             target_os_filename="${{ matrix.target_os }}-$arch"
             release_name_standalone="jsunmap-$version-standalone-$target_os_filename"

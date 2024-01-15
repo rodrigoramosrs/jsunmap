@@ -53,12 +53,12 @@ jobs:
          
       - name: Compile binaries
         run: |
-          $RUNTIMES = @("linux-x64","linux-arm64")
+          RUNTIMES=("linux-x64","linux-arm64")
           mkdir build
           mkdir release
           dotnet restore ./src/jsunmap.sln
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
-          foreach ($RUNTIME in $RUNTIMES) {
+          for RUNTIME in "${RUNTIMES[@]}"; do
             echo "building $RUNTIME"
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
             zip -r  ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip ./build/$RUNTIME

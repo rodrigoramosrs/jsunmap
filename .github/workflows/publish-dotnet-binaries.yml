@@ -10,12 +10,11 @@ env:
 jobs:
   release_and_publish:
     name: Create release and publish
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        arch: ['win-x64', 'win-arm64', 'linux-x64', 'linux-arm64', 'osx-x64']
-        
-    runs-on: ubuntu-latest
-
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: ['x64', 'arm64']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,16 +32,24 @@ jobs:
         shell: bash
         run: |
           version=${{ github.run_number }}
-          release_name_standalone="jsunmap-$version-${{ matrix.arch }}-standalone"
-          release_name="jsunmap-$version-${{ matrix.arch }}"
+          release_name_standalone="jsunmap-$version-${{ matrix.target_os }}-${{ matrix.arch }}-standalone"
+          release_name="jsunmap-$version-${{ matrix.target_os }}-${{ matrix.arch }}-standalone"
+          target_arch=""
+          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
+            target_arch="win-${{ matrix.arch }}"
+          elif [[ "${{ matrix.target_os }}" == "linux" ]]; then
+            target_arch="linux-${{ matrix.arch }}"
+          elif [[ "${{ matrix.target_os }}" == "mac" ]]; then
+            target_arch="osx-${{ matrix.arch }}"
+          fi
 
           # Self contained
-          dotnet publish ./src/jsunmap.csproj -c Release -r "${{ matrix.arch }}" -o "$release_name_standalone" --self-contained -p:PublishTrimmed=true
+          dotnet publish ./src/jsunmap.csproj -c Release -r "$target_arch" -o "$release_name_standalone" --self-contained -p:PublishTrimmed=true
 
           # Framework dependant
-          dotnet publish ./src/jsunmap.csproj -c Release -r "${{ matrix.arch }}" -o "$release_name" --self-contained false -p:PublishTrimmed=false
+          dotnet publish ./src/jsunmap.csproj -c Release -r "$target_arch" -o "$release_name" --self-contained false -p:PublishTrimmed=false
 
-          if [ "${{ matrix.arch }}" == "win-x64" ]; then
+          if [ "${{ matrix.target_os }}" == "windows" ]; then
             # Pack for standalone version
             7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
             

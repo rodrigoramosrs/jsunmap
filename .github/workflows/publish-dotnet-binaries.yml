@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        arch: [x64, arm64]
+        arch: ["x64", "arm64"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,8 +32,9 @@ jobs:
         shell: bash
         run: |
           version=${{ github.run_number }}
-          release_name_standalone="jsunmap-$version-${{ matrix.target_os }}-${{ matrix.arch }}-standalone"
-          release_name="jsunmap-$version-${{ matrix.target_os }}-${{ matrix.arch }}-standalone"
+          target_os_filename="${{ matrix.target_os }}-${{ matrix.arch }}"
+          release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
+          release_name="jsunmap-$version-#target_os_filename"
           target_arch=""
           if [[ "${{ matrix.target_os }}" == "windows" ]]; then
             target_arch="win-${{ matrix.arch }}"

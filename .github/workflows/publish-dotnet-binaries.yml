@@ -52,6 +52,7 @@ jobs:
             target_arch="win-${{ matrix.arch }}"
           elif [[ "${{ matrix.target_os }}" == "linux" ]]; then
             target_arch="linux-${{ matrix.arch }}"
+            sudo apt-get install clang
           elif [[ "${{ matrix.target_os }}" == "macos" ]]; then
             target_arch="osx-${{ matrix.arch }}"
           fi

@@ -15,6 +15,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         arch: ["x64", "arm64"]
+        include:
+          - os: ubuntu-latest
+            target_os: linux
+          - os: windows-latest
+            target_os: windows
+          - os: macOS-latest
+            target_os: darwin
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,15 +39,15 @@ jobs:
         shell: bash
         run: |
           version=${{ github.run_number }}
-          target_os_filename="${{ $RUNNER_OS }}-${{ matrix.arch }}"
+          target_os_filename="${{ $matrix.target_os }}-${{ matrix.arch }}"
           release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
           release_name="jsunmap-$version-#target_os_filename"
           target_arch=""
-          if [[ "${{ $RUNNER_OS }}" == "Windows" ]]; then
+          if [[ "${{ $matrix.target_os }}" == "Windows" ]]; then
             target_arch="win-${{ matrix.arch }}"
-          elif [[ "${{ $RUNNER_OS }}" == "Linux" ]]; then
+          elif [[ "${{ $matrix.target_os }}" == "Linux" ]]; then
             target_arch="linux-${{ matrix.arch }}"
-          elif [[ "${{ $RUNNER_OS }}" == "macOS" ]]; then
+          elif [[ "${{ $matrix.target_os }}" == "macOS" ]]; then
             target_arch="osx-${{ matrix.arch }}"
           fi
 
@@ -56,7 +63,7 @@ jobs:
           # Framework dependant
           dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name" -p:PublishTrimmed=false
 
-          if [ "${{ $RUNNER_OS }}" == "Windows" ]; then
+          if [ "${{ $matrix.target_os }}" == "Windows" ]; then
             # Pack for standalone version
             7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
             

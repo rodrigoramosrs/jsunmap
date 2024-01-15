@@ -43,6 +43,9 @@ jobs:
             target_arch="osx-${{ matrix.arch }}"
           fi
 
+          dotnet restore ./src/jsunmap.sln
+          dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
+          
           # Self contained
           dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone" -p:PublishTrimmed=true
 

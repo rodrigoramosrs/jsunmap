@@ -48,7 +48,7 @@ jobs:
       - name: Install unix requirements for arm64 build
         if: matrix.target_os == 'linux'
         run: |
-          sudo apt-get update && sudo apt-get install clang zlib1g-dev binutils binutils-aarch64-linux-gnu libstdc++-12-dev -y
+          sudo apt-get update && sudo apt-get install clang llvm binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu zlib1g-dev:arm64 -y
           
       - name: Build
         shell: bash

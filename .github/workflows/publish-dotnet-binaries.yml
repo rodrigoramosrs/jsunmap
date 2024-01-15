@@ -54,7 +54,6 @@ jobs:
       - name: Compile binaries
         run: |
           RUNTIMES=("linux-x64","linux-arm64")
-          RUNTIMES=${RUNTIMES//,/ }
           mkdir build
           mkdir release
           dotnet restore ./src/jsunmap.sln

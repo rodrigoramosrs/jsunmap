@@ -32,7 +32,6 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          version=$(cat ./src/jsunmap.sln | grep -oP "<Version>\K([0-9]\.[0-9]\.[0-9])")
           version=${{ github.run_number }}
           release_name_standalone="jsunmap-$version-${{ matrix.arch }}-standalone"
           release_name="jsunmap-$version-${{ matrix.arch }}"

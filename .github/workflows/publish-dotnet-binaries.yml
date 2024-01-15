@@ -32,15 +32,15 @@ jobs:
         shell: bash
         run: |
           version=${{ github.run_number }}
-          target_os_filename="${{ $runner.os }}-${{ matrix.arch }}"
+          target_os_filename="${{ $RUNNER_OS }}-${{ matrix.arch }}"
           release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
           release_name="jsunmap-$version-#target_os_filename"
           target_arch=""
-          if [[ "${{ $runner.os }}" == "Windows" ]]; then
+          if [[ "${{ $RUNNER_OS }}" == "Windows" ]]; then
             target_arch="win-${{ matrix.arch }}"
-          elif [[ "${{ $runner.os }}" == "Linux" ]]; then
+          elif [[ "${{ $RUNNER_OS }}" == "Linux" ]]; then
             target_arch="linux-${{ matrix.arch }}"
-          elif [[ "${{ $runner.os }}" == "macOS" ]]; then
+          elif [[ "${{ $RUNNER_OS }}" == "macOS" ]]; then
             target_arch="osx-${{ matrix.arch }}"
           fi
 
@@ -56,7 +56,7 @@ jobs:
           # Framework dependant
           dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name" -p:PublishTrimmed=false
 
-          if [ "${{ $runner.os }}" == "Windows" ]; then
+          if [ "${{ $RUNNER_OS }}" == "Windows" ]; then
             # Pack for standalone version
             7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
             

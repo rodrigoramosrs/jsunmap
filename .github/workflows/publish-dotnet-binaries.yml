@@ -19,15 +19,12 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 8.0.x
-
-      - name: Create paths
-        run: |
-          md build
-          md release
-          
+ 
       - name: Compile binaries
         run: |
           $RUNTIMES = @("win-x64","win-arm64")
+          md build
+          md release
           dotnet restore ./src/jsunmap.sln
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
           foreach ($RUNTIME in $RUNTIMES) {
@@ -53,21 +50,18 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 8.0.x
-  
-      - name: Create paths
-        run: |
-          md build
-          md release
-          
+         
       - name: Compile binaries
         run: |
-          $RUNTIMES = @("linux-x64","linux-arm64",)
+          $RUNTIMES = @("linux-x64","linux-arm64")
+          mkdir build
+          mkdir release
           dotnet restore ./src/jsunmap.sln
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
           foreach ($RUNTIME in $RUNTIMES) {
             echo "building $RUNTIME"
             dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime $RUNTIME --verbosity quiet -p:PublishTrimmed=true -o ./build/$RUNTIME /p:WarningLevel=0
-            Compress-Archive -Path ./build/$RUNTIME -DestinationPath ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip
+            zip -r  ./release/JsUnMap-${{ github.run_number }}-$RUNTIME.zip ./build/$RUNTIME
           }
           ls ./release/
       - name: Upload artifact

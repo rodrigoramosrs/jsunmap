@@ -14,14 +14,17 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        arch: ["x64", "arm64"]
+        #arch: ["x64", "arm64"]
         include:
           - os: ubuntu-latest
             target_os: linux
+            arch_list: ("linux-x64 linux-arm64")
           - os: windows-latest
             target_os: windows
+            arch_list: ("win-x86 win-x64 win-arm64")
           - os: macos-latest
             target_os: macos
+            arch_list: ("osx-64")
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,52 +41,41 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          if [[ "${{ matrix.target_os }}" == "macos" && "${{ matrix.arch }}" == "arm64" ]]; then
-            # No support for arm64 build using macos
-            exit 0;
-          fi
-          
           version=${{ github.run_number }}
-          target_os_filename="${{ matrix.target_os }}-${{ matrix.arch }}"
-          release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
-          release_name="jsunmap-$version-#target_os_filename"
-          target_arch=""
-          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
-            target_arch="win-${{ matrix.arch }}"
-          elif [[ "${{ matrix.target_os }}" == "linux" ]]; then
-            target_arch="linux-${{ matrix.arch }}"
-            sudo apt-get install clang
-          elif [[ "${{ matrix.target_os }}" == "macos" ]]; then
-            target_arch="osx-${{ matrix.arch }}"
-          fi
 
-          dotnet restore ./src/jsunmap.sln
-          dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
-
-          echo "Arch: $target_arch - ${{ matrix.arch  }}"
-          echo "Self contained: $release_name_standalone"
-          
-          # Self contained
-          dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
-          
-          echo "Framework dependant: $release_name"
-          # Framework dependant
-          dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
-
-          if [ "${{ matrix.target_os }}" == "windows" ]; then
-            # Pack for standalone version
-            7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
+          for arch in "${{ matrix.arch_list[@] }}; do
+            target_os_filename="${{ matrix.target_os }}-$arch"
+            release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
+            release_name="jsunmap-$version-#target_os_filename"
+            target_arch="$arch"
             
-            # Pack for Framework dependant version
-            7z a -tzip "${release_name}.zip" "./${release_name}/*"
-          else
-            tar czvf "${release_name_standalone}.tar.gz" "$release_name_standalone"
+            echo "Arch: $target_arch
+            echo "Self contained: $release_name_standalone"
             
-            tar czvf "${release_name}.tar.gz" "$release_name"
-          fi
+            dotnet restore ./src/jsunmap.sln
+            
+            # Self contained
+            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
+            
+            echo "Framework dependant: $release_name"
+            # Framework dependant
+            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
 
-          rm -r "$release_name_standalone"
-          rm -r "$release_name"
+            if [ "${{ matrix.target_os }}" == "windows" ]; then
+              # Pack for standalone version
+              7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
+
+              # Pack for Framework dependant version
+              7z a -tzip "${release_name}.zip" "./${release_name}/*"
+            else
+              tar czvf "${release_name_standalone}.tar.gz" "$release_name_standalone"
+              
+              tar czvf "${release_name}.tar.gz" "$release_name"
+            fi
+
+            rm -r "$release_name_standalone"
+            rm -r "$release_name"
+          done
 
       - name: Publish
         uses: softprops/action-gh-release@v1

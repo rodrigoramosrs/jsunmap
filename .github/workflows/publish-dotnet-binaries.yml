@@ -46,7 +46,7 @@ jobs:
           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
       
       - name: Install unix requirements for arm64 build
-        if: matrix.target_os != 'windows'
+        if: matrix.target_os == 'linux'
         run: |
           sudo apt-get update && sudo apt-get install clang zlib1g-dev binutils binutils-aarch64-linux-gnu -y
           

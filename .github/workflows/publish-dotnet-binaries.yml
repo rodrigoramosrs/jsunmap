@@ -20,7 +20,7 @@ jobs:
             target_os: linux
           - os: windows-latest
             target_os: windows
-          - os: macOS-latest
+          - os: macos-latest
             target_os: darwin
     steps:
       - name: Checkout

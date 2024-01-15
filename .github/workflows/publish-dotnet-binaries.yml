@@ -35,8 +35,13 @@ jobs:
           dotnet-version: 8.0.x
       - name: Get commit message
         run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-          echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+         if [ "${{ matrix.target_os }}" == "windows" ]; then
+           $COMMIT_MESSAGE = git log -1 --pretty=format:%s
+           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+         else
+           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+         fi
           
       - name: Build
         shell: bash

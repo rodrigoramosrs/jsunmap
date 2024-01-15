@@ -45,10 +45,13 @@ jobs:
 
           dotnet restore ./src/jsunmap.sln
           dotnet build ./src/jsunmap.sln --configuration Release /p:WarningLevel=0
+
+          echo "Self contained: $release_name_standalone"
           
           # Self contained
           dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone" -p:PublishTrimmed=true
-
+          
+          echo "Framework dependant: $release_name"
           # Framework dependant
           dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name" -p:PublishTrimmed=false
 

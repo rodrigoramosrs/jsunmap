@@ -8,97 +8,132 @@ env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
   
 jobs:
-  release_and_publish:
-    name: Create release and publish
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        #arch: ["x64", "arm64"]
-        include:
-          - os: windows-latest
-            target_os: windows
-            arch_list: "win-x64,win-arm64"
-          - os: ubuntu-latest
-            target_os: linux
-            arch_list: "linux-x64"
-          - os: macos-latest
-            target_os: macos
-            arch_list: "osx-x64"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Get commit message
-        if: matrix.target_os != 'windows'
-        run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
-            Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          else
-            echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          fi
-
-      - name: Build
-        shell: bash
-        run: |
-          version=${{ github.run_number }}
-          IFS=',' read -ra matrix_arch_list <<< "${{ matrix.arch_list }}"
-          
-          for arch in "${matrix_arch_list[@]}"; do
-            target_os_filename="${{ matrix.target_os }}-$arch"
-            release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
-            release_name="jsunmap-$version-$target_os_filename"
-            target_arch="$arch"
-            
-            echo "Arch: $target_arch"
-            echo "Self contained: $release_name_standalone"
-            
-            dotnet restore ./src/jsunmap.sln
-            
-            # Self contained
-            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
-            
-            echo "Framework dependant: $release_name"
-            
-            # Framework dependant
-            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
-
-            if [[ "${{ matrix.target_os }}" == "windows" ]]; then
-              # Pack for standalone version
-              7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
-
-              # Pack for Framework dependant version
-              7z a -tzip "${release_name}.zip" "./${release_name}/*"
-            else
-              tar czvf "${release_name_standalone}.tar.gz" "$release_name_standalone"
+    release:
+      name: Create release   
+      needs: [compile_binaires]
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+        
+        - name: Get commit message
+          run: |
+           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+           
+        - name: Create release
+          id: create_release
+          uses: actions/create-release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+          with:
+            tag_name: v${{ github.run_number }}
+            release_name: Release v${{ github.run_number }}
+            body: |
+              Auto release. 
+              ${{ env.COMMIT_MESSAGE }}
+            draft: false
+            prerelease: false
+        - name: Download artifact
+          uses: actions/download-artifact@v2
+          with:
+            name: "jsunmap-*"
+            path: ./release/
               
-              tar czvf "${release_name}.tar.gz" "$release_name"
+        - name: Upload release asset
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./release/
+            asset_name:  "jsunmap-*"
+            asset_content_type: application/zip
+              
+    compile_binaires:
+      name: Compile binaries
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest, macos-latest]
+          #arch: ["x64", "arm64"]
+          include:
+            - os: windows-latest
+              target_os: windows
+              arch_list: "win-x64,win-arm64"
+            - os: ubuntu-latest
+              target_os: linux
+              arch_list: "linux-x64"
+            - os: macos-latest
+              target_os: macos
+              arch_list: "osx-x64"
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+  
+        - name: Setup dotnet
+          uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: 8.0.x
+  
+        - name: Get commit message
+          if: matrix.target_os != 'windows'
+          run: |
+            COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+            if [[ "${{ matrix.target_os }}" == "windows" ]]; then
+              Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+            else
+              echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
             fi
+  
+        - name: Build
+          shell: bash
+          run: |
+            version=${{ github.run_number }}
+            IFS=',' read -ra matrix_arch_list <<< "${{ matrix.arch_list }}"
+            
+            for arch in "${matrix_arch_list[@]}"; do
+              target_os_filename="${{ matrix.target_os }}-$arch"
+              release_name_standalone="jsunmap-$version-standalone-$target_os_filename"
+              release_name="jsunmap-$version-$target_os_filename"
+              target_arch="$arch"
+              
+              echo "Arch: $target_arch"
+              echo "Self contained: $release_name_standalone"
+              
+              dotnet restore ./src/jsunmap.sln
+              
+              # Self contained
+              dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
+              
+              echo "Framework dependant: $release_name"
+              
+              # Framework dependant
+              dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
+  
+              if [[ "${{ matrix.target_os }}" == "windows" ]]; then
+                # Pack for standalone version
+                7z a -tzip "${release_name_standalone}.zip" "./${release_name_standalone}/*"
+  
+                # Pack for Framework dependant version
+                7z a -tzip "${release_name}.zip" "./${release_name}/*"
+              else
+                tar czvf "${release_name_standalone}.tar.gz" "$release_name_standalone"
+                
+                tar czvf "${release_name}.tar.gz" "$release_name"
+              fi
+  
+              rm -r "$release_name_standalone"
+              rm -r "$release_name"
+            done
+            
+        - name: Upload artifact
+          uses: actions/upload-artifact@v2
+          env:
+            GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+          with:
+            name: "jsunmap-*"
+            path: ./
+  
 
-            rm -r "$release_name_standalone"
-            rm -r "$release_name"
-          done
-          
-      - name: Generate release tag
-        id: tag
-        run: |
-          version=${{ github.run_number }}
-          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
-           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-          else
-            echo "::set-output name=release_tag::$version"
-          fi
-
-      - name: Release files
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
-          files: "jsunmap-*"
+    

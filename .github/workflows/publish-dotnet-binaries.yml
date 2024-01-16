@@ -63,12 +63,12 @@ jobs:
             dotnet restore ./src/jsunmap.sln
             
             # Self contained
-            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone" -v d
+            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
             
             echo "Framework dependant: $release_name"
             
             # Framework dependant
-            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name" -v d
+            dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
 
             if [[ "${{ matrix.target_os }}" == "windows" ]]; then
               # Pack for standalone version
@@ -85,11 +85,16 @@ jobs:
             rm -r "$release_name_standalone"
             rm -r "$release_name"
           done
-
-      - name: Publish
+          
+      - name: Generate release tag
+        id: tag
+        run: |
+          echo "::set-output name=release_tag::UserBuild_$(date +"%Y.%m.%d_%H-%M")"
+      - name: Release files
         uses: softprops/action-gh-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
           files: "jsunmap-*"
       

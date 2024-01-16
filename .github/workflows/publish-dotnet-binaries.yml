@@ -21,7 +21,7 @@ jobs:
             arch_list: "win-x64,win-arm64"
           - os: ubuntu-latest
             target_os: linux
-            arch_list: "linux-x64,linux-arm64"
+            arch_list: "linux-x64"
           - os: macos-latest
             target_os: macos
             arch_list: "osx-x64"
@@ -44,20 +44,7 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
           echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-      
-      - name: Install unix requirements for arm64 build
-        if: matrix.target_os == 'linux'
-        run: |
-          sudo sed -i 's/deb http/deb [arch=amd64,i386] http/' /etc/apt/sources.list
-          sudo grep "ubuntu.com/ubuntu" /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/ports.list
-          sudo sed -i 's/amd64,i386/armhf,arm64/' /etc/apt/sources.list.d/ports.list
-          sudo sed -i 's#http://.*/ubuntu#http://ports.ubuntu.com/ubuntu-ports#' /etc/apt/sources.list.d/ports.list
-          sudo dpkg --add-architecture i386; sudo dpkg --add-architecture armhf; sudo dpkg --add-architecture arm64
-          sudo apt-get update || true
-          sudo apt-get -yq install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
-          sudo apt-get -yq install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
-          sudo apt-get -yq install clang llvm binutils zlib1g-dev
-          
+
       - name: Build
         shell: bash
         run: |
@@ -101,6 +88,8 @@ jobs:
 
       - name: Publish
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
         with:
           files: "jsunmap-*"
       

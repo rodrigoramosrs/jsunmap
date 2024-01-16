@@ -33,17 +33,16 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
-      - name: Get commit message windows
-        if: matrix.target_os == 'windows'
-        run: |
-          $COMMIT_MESSAGE = git log -1 --pretty=format:%s
-          Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
-      
-      - name: Get commit message unix
+
+      - name: Get commit message
         if: matrix.target_os != 'windows'
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
-          echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
+            Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          else
+            echo "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          fi
 
       - name: Build
         shell: bash
@@ -89,7 +88,13 @@ jobs:
       - name: Generate release tag
         id: tag
         run: |
-          echo "::set-output name=release_tag::UserBuild_$(date +"%Y.%m.%d_%H-%M")"
+          version=${{ github.run_number }}
+          if [[ "${{ matrix.target_os }}" == "windows" ]]; then
+           Write-Host "::set-env name=COMMIT_MESSAGE::$COMMIT_MESSAGE"
+          else
+            echo "::set-output name=release_tag::$version"
+          fi
+
       - name: Release files
         uses: softprops/action-gh-release@v1
         env:

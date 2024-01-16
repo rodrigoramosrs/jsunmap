@@ -35,19 +35,25 @@ jobs:
             draft: false
             prerelease: false
         - name: Download artifact
-          uses: actions/download-artifact@v2
+          uses: actions/download-artifact@v4
           with:
-            name: "jsunmap-*"
+            name: |
+              "jsunmap-${{ github.run_number }}-windows"
+              "jsunmap-${{ github.run_number }}-linux"
+              "jsunmap-${{ github.run_number }}-macos"
             path: ./release/
               
         - name: Upload release asset
-          uses: actions/upload-release-asset@v1
+          uses: actions/upload-release-asset@v4
           env:
             GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
             asset_path: ./release/
-            asset_name:  "jsunmap-*"
+            asset_name:  |
+             "jsunmap-${{ github.run_number }}-windows"
+             "jsunmap-${{ github.run_number }}-linux"
+             "jsunmap-${{ github.run_number }}-macos"
             asset_content_type: application/zip
               
     compile_binaires:
@@ -104,12 +110,12 @@ jobs:
               dotnet restore ./src/jsunmap.sln
               
               # Self contained
-              dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "$release_name_standalone"
+              dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained --runtime "$target_arch" -o "./release/self/$release_name_standalone"
               
               echo "Framework dependant: $release_name"
               
               # Framework dependant
-              dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "$release_name"
+              dotnet publish ./src/jsunmap.csproj --configuration Release --self-contained false --runtime "$target_arch" -o "./release/dependant/$release_name"
   
               if [[ "${{ matrix.target_os }}" == "windows" ]]; then
                 # Pack for standalone version
@@ -128,12 +134,12 @@ jobs:
             done
             
         - name: Upload artifact
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v4
           env:
             GITHUB_TOKEN: ${{ secrets.BUILD_KEY }}
           with:
-            name: "jsunmap-*"
-            path: ./
+            name: "jsunmap-${{ github.run_number }}-${{ matrix.target_os }}"
+            path: ./release/*
   
 
     

@@ -19,6 +19,12 @@
 
 ## Example 📖
 
+```
+dotnet run -p ./src/jsunmap.csproj [{FILE_OR_URL_PATH}]
+```
+
+ or
+
 ```shell
 jsunmap [{FILE_OR_URL_PATH}]
 ```

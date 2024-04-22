@@ -115,11 +115,10 @@ namespace jsunmap.Services
                         .Replace(":", string.Empty);
 
                     string dir = PathUtils.RemoveInvalidPathCharacters(Path.Combine(outputPath, dirName));
+                    dir = Path.GetDirectoryName(dir);
 
                     if (!Directory.Exists(dir))
-                    {
                         Directory.CreateDirectory(dir);
-                    }
 
 
                     string file = PathUtils.RemoveInvalidFilenameCharacters(Path.GetFileName(source.GetString()));

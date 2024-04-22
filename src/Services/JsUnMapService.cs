@@ -107,12 +107,14 @@ namespace jsunmap.Services
             {
                 try
                 {
-                    string dir = outputPath + Path.GetDirectoryName(source.GetString()
-                        .Replace("/.",string.Empty)
+                    string dirName = source.GetString()
+                        .Replace("../", string.Empty)
+                        .Replace("/..", string.Empty)
+                        .Replace("/.", string.Empty)
                         .Replace("webpack:", string.Empty)
-                        .Replace(":", string.Empty)
-                        .Replace("..", string.Empty));
-                    dir = PathUtils.RemoveInvalidPathCharacters(dir);
+                        .Replace(":", string.Empty);
+
+                    string dir = PathUtils.RemoveInvalidPathCharacters(Path.Combine(outputPath, dirName));
 
                     if (!Directory.Exists(dir))
                     {

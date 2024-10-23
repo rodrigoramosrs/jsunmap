@@ -34,6 +34,7 @@ namespace jsunmap.Services
             Console.WriteLine($"[i] Searching for sensitive data, please wait ...");
             ExtractSensitveData(OutputPath);
             Console.WriteLine($"[!] Done....");
+            Console.WriteLine("");
         }
 
         private static void ExtractSensitveData(string PathToScan)
@@ -42,13 +43,14 @@ namespace jsunmap.Services
 
             StringBuilder sensitiveOutputContent = new StringBuilder();
             StringBuilder piiOutputContent = new StringBuilder();
-            foreach (var filePath in Directory.EnumerateFiles(PathToScan, "*.*", SearchOption.AllDirectories))
+            var fileArray = Directory.EnumerateFiles(PathToScan, "*.*", SearchOption.AllDirectories);
+            Console.WriteLine($"[i] Found {fileArray.Count()} file(s) to scan.");
+            
+            foreach (var filePath in fileArray)
             {
                 string currentFileContent = File.ReadAllText(filePath);
-
                 string RelativeFilePath = filePath.Replace(GlobalSettings.OutputPath, string.Empty).Remove(0, 1);
                 AppendOutputFileWithSensitiveData(Path.Combine(PathToScan, $"sensitive_data.txt"), RelativeFilePath, RegexService.ExtractAllGeneralSensitiveData(currentFileContent));
-
                 AppendOutputFileWithSensitiveData(Path.Combine(PathToScan, $"surface_data.txt"), RelativeFilePath, RegexService.ExtractAllSurfaceData(currentFileContent));
                 AppendOutputFileWithSensitiveData(Path.Combine(PathToScan, $"pii_data.txt"), RelativeFilePath, RegexService.ExtractAllPÌIData(currentFileContent));
             }
@@ -73,19 +75,19 @@ namespace jsunmap.Services
 
                         if (!printedFilename)
                         {
-                            sensitiveOutputContent.AppendLine($"== [ FILE: {SourceFilename} ] ==\r\n");
+                            sensitiveOutputContent.AppendLine($"[ FILE: {SourceFilename} ]\r\n");
                             printedFilename = true;
                         }
 
                         if (!printedCategoryName)
                         {
-                            sensitiveOutputContent.AppendLine($"== [ CATEGORY: {dictionaryItem.Key} ] ==\r\n");
+                            sensitiveOutputContent.AppendLine($"[ CATEGORY: {dictionaryItem.Key} ]\r\n");
 
                             printedCategoryName = true;
                         }
-                        sensitiveOutputContent.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                        //sensitiveOutputContent.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
                         sensitiveOutputContent.AppendLine(value + "\r\n");
-                        sensitiveOutputContent.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                        //sensitiveOutputContent.AppendLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
 
                     }
                     if (printedFilename || printedCategoryName)
@@ -112,7 +114,10 @@ namespace jsunmap.Services
                         .Replace("/..", string.Empty)
                         .Replace("/.", string.Empty)
                         .Replace("webpack:", string.Empty)
-                        .Replace(":", string.Empty);
+                        .Replace(":", string.Empty)
+                        .Replace("//", string.Empty)
+                        .Replace("\"", string.Empty)
+                        .Replace("'",string.Empty);
 
                     string dir = PathUtils.RemoveInvalidPathCharacters(Path.Combine(outputPath, dirName));
                     dir = Path.GetDirectoryName(dir);

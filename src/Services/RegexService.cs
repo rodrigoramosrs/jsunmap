@@ -76,7 +76,7 @@ namespace jsunmap.Services
 
                 outputResult.Add(regexItem.Key, new List<string>(matches
                     .Where(x => !string.IsNullOrEmpty(x.Groups[1].Value.Trim()))
-                    .Select(x => x.Groups[1].Value.Trim())));
+                    .Select(x =>$"{x.Groups[1].Value.Trim()} (position {x.Groups[1].Index})" )));
             }
 
             return outputResult;
